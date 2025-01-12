@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import './App.css'
 import Header from './components/Header'
@@ -9,12 +9,29 @@ import Profile from './components/Profile'
 import All from './components/All'
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      setIsAuthenticated(true)
+    }
+  }, [])
+
+  const handleLogin = (token: string) => {
+    localStorage.setItem('token', token)
+    setIsAuthenticated(true)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    setIsAuthenticated(false)
+  }
 
   return (
-    <div className="App">
+    <div className="App ">
       <BrowserRouter>
-        <Header />
+        <Header status = {isAuthenticated}/>
         <Routes>
           <Route path='/' element={<Navigate to='/home' />}></Route>
           <Route path='/home' element={<Home />}></Route>
