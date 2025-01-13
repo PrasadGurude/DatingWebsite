@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { PrismaClient } from '@prisma/client/edge'
+import { Prisma, PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { cors } from 'hono/cors';
 import { sign, verify } from 'hono/jwt'
@@ -40,7 +40,7 @@ app.use("/api", async (c, next) => {
   }
 });
 
-app.post("sighup", async (c)=>{
+app.post("/sighup", async (c)=>{
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -56,7 +56,7 @@ app.post("sighup", async (c)=>{
       const token = await sign({ id: exhist.id }, c.env.JWT_SECRET);
       return c.json({token , exhist})
     }
-    const user = await prisma.user.create({
+    const newUser = await prisma.user.create({
     data: {
       name        :body.name,
       email       :body.email,      
@@ -71,14 +71,14 @@ app.post("sighup", async (c)=>{
       insta_id    :body.insta_id
     }
   })
-  const token = await sign({ id: user.id }, c.env.JWT_SECRET);
-  return c.json({token , user})
+  const token = await sign({ id: newUser.id }, c.env.JWT_SECRET);
+  return c.json({token , newUser})
   }catch(err){
     return c.json({error:"some problem occured in signup",err})
   }
 })
 
-app.post("/api/send", async (c) => {
+app.post("/api/send-request", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -86,7 +86,7 @@ app.post("/api/send", async (c) => {
   const userId = c.get('userId');
 
   const body = await c.req.json();
-  const updateRightSwipeArray = await prisma.user.update({
+  const updateArr = await prisma.user.update({
     where: {
       id: userId
     },
@@ -96,19 +96,134 @@ app.post("/api/send", async (c) => {
       }
     }
   })
+
+  const checkMatch = await prisma.user.findUnique({
+    where:{
+      id:body.requestedId
+    }
+  })
+
+  checkMatch?.requestedIds.map((id)=>{ 
+    if(id === userId){
+      const match = prisma.user.update({
+        where:{
+          id:userId
+        },
+        data:{
+          matchStatus:true,
+          matchId:body.requestedId
+        }
+      })
+      const match2 = prisma.user.update({
+        where:{
+          id:body.requestedId
+        },
+        data:{
+          matchStatus:true,
+          matchId:userId
+        }
+      })
+    }
+  })
+
   return c.json({ sucess: true, message: 'match request successfully' })
 })
  
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
+app.put("/api/send-remove-request", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const userId = c.get('userId');
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    return c.json({ message: "User not found." }, 404);
+  }
+
+  const body = await c.req.json();
+  const updateRightSwipeArray = await prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      requestedIds: {
+        set: user.requestedIds.filter((id) => id !== body.requestedId),
+      }
+    }
+  })
+  const checkMatch = await prisma.user.findUnique({
+    where:{
+      id:body.requestedId
+    }
+  })
+
+  checkMatch?.requestedIds.map((id)=>{ 
+    if(id === userId){
+      const match = prisma.user.update({
+        where:{
+          id:userId
+        },
+        data:{
+          matchStatus:false,
+          matchId:""
+        }
+      })
+      const match2 = prisma.user.update({
+        where:{
+          id:body.requestedId
+        },
+        data:{
+          matchStatus:false,
+          matchId:""
+        }
+      })
+    }
+  })
+  return c.json({ sucess: true, message: 'match request successfully send' })
 })
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
+app.get('/api/requested-array', async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const userId = c.get('userId');
+  const user = await prisma.user.findUnique({
+    where :{
+      id:userId
+    }
+  })
+ 
+  const id_arr = user?.requestedIds
+
+  const users = await prisma.user.findMany({
+    where:{
+      id:{
+        in:id_arr
+      }
+    }
+  })
+  
+  return c.json(users);
 })
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
+app.get('/profile',async (c) => {
+
+  const userId = c.get('userId');
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const user = await prisma.user.findUnique({
+    where:{
+      id:userId
+    }
+  })
+  return c.json({user,message:"profile fetched successfully"})
 })
 
 export default app
