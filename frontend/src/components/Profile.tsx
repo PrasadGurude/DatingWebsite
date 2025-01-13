@@ -4,9 +4,10 @@ const Profile: React.FC = () => {
   const [user, setUser] = useState({
     name: 'John Doe',
     email: 'john.doe@example.com',
-    age: 30,
-    bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    age: 18,
     gender: 'Male',
+    branch: 'CE',
+    engYear: 1,
     instaProfile: 'https://instagram.com/johndoe',
   });
 
@@ -50,36 +51,66 @@ const Profile: React.FC = () => {
           <label className="block text-gray-700 mb-2">Email</label>
           <p className="bg-gray-100 p-2 mb-4 rounded-lg">{user.email}</p>
 
-          <label className="block text-gray-700 mb-2">Age</label>
-          {isEditing ? (
-            <input
-              type="number"
-              name="age"
-              value={user.age}
-              onChange={handleChange}
-              className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          ) : (
-            <p className="bg-gray-100 p-2 mb-4 rounded-lg">{user.age}</p>
-          )}
+          <div className="mb-4 flex justify-around">
+            <div>
+              <label className="block text-gray-700 mb-2">Age</label>
+              {isEditing ? (
+                <input
+                  type="number"
+                  name="age"
+                  value={user.age}
+                  onChange={handleChange}
+                  className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              ) : (
+                <p className="bg-gray-100 p-2 mb-4 rounded-lg w-44">{user.age}</p>
+              )}
+            </div>
 
-          <label className="block text-gray-700 mb-2">Bio</label>
+            <div>
+              <label className="block text-gray-700 mb-2">Engineering Year</label>
+              {isEditing ? (
+                <input
+                  type="number"
+                  name="engYear"
+                  max={4}
+                  min={1}
+                  value={user.engYear}
+                  onChange={handleChange}
+                  className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              ) : (
+                <p className="bg-gray-100 p-2 mb-4 rounded-lg">{user.engYear}</p>
+              )}
+            </div>
+          </div>
+
+          <label className="block text-gray-700 mb-2">Branch</label>
           {isEditing ? (
-            <textarea
-              name="bio"
-              value={user.bio}
+            <select
+              name="branch"
+              value={user.branch}
               onChange={handleChange}
               className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            >
+              <option value="CE">Computer Engineering</option>
+              <option value="IT">Information & Technology</option>
+              <option value="AI">Artificial Intelligence</option>
+              <option value="AIML">Artificial Intelligence and Machine Learning</option>
+              <option value="AIDS">Artificial Intelligence and Data Science</option>
+              <option value="CIVIL">Civil Engineering</option>
+              <option value="ME">Mechanical Engineering</option>
+              <option value="ENTC">Electronics and Telecommunication Engineering</option>
+            </select>
           ) : (
-            <p className="bg-gray-100 p-2 mb-4 rounded-lg">{user.bio}</p>
+            <p className="bg-gray-100 p-2 mb-4 rounded-lg">{user.branch}</p>
           )}
 
           <label className="block text-gray-700 mb-2">Gender</label>
           {isEditing ? (
             <select
               name="gender"
-              value={user.gender}
+              value={user.branch}
               onChange={handleChange}
               className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >

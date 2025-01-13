@@ -15,7 +15,7 @@ const app = new Hono<{
 }>();
 
 
-app.use(cors()) 
+app.use(cors())
 
 app.use("/api", async (c, next) => {
   const jwt = c.req.header('Authorization');
@@ -32,7 +32,7 @@ app.use("/api", async (c, next) => {
       return c.json({ message: "unauthorized user" });
     }
 
-    c.set('userId', payload.id as string) 
+    c.set('userId', payload.id as string)
     await next();
   } catch (error) {
     c.status(401);
@@ -40,41 +40,41 @@ app.use("/api", async (c, next) => {
   }
 });
 
-app.post("/sighup", async (c)=>{
+app.post("/sighup", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  try{
+  try {
     const body = await c.req.json()
     const exhist = await prisma.user.findUnique({
-      where:{
-        email:body.email
+      where: {
+        email: body.email
       }
     })
-    if(exhist){
+    if (exhist) {
       const token = await sign({ id: exhist.id }, c.env.JWT_SECRET);
-      return c.json({token , exhist})
+      return c.json({ token, exhist })
     }
     const newUser = await prisma.user.create({
-    data: {
-      name        :body.name,
-      email       :body.email,      
-      requestedIds:body.requestedIds,
-      matchStatus :body.matchStatus,
-      matchId     :body.matchId,
-      picture     :body.picture,
-      age         :body.age,
-      engYear     :body.engYear,
-      branch      :body.branch,
-      gender      :body.gender,
-      insta_id    :body.insta_id
-    }
-  })
-  const token = await sign({ id: newUser.id }, c.env.JWT_SECRET);
-  return c.json({token , newUser})
-  }catch(err){
-    return c.json({error:"some problem occured in signup",err})
+      data: {
+        name: body.name,
+        email: body.email,
+        requestedIds: body.requestedIds,
+        matchStatus: body.matchStatus,
+        matchId: body.matchId,
+        picture: body.picture,
+        age: body.age,
+        engYear: body.engYear,
+        branch: body.branch,
+        gender: body.gender,
+        insta_id: body.insta_id
+      }
+    })
+    const token = await sign({ id: newUser.id }, c.env.JWT_SECRET);
+    return c.json({ token, newUser })
+  } catch (err) {
+    return c.json({ error: "some problem occured in signup", err })
   }
 })
 
@@ -90,7 +90,7 @@ app.post("/api/send-request", async (c) => {
     where: {
       id: userId
     },
-    data: {  
+    data: {
       requestedIds: {
         push: body.requestedId
       }
@@ -98,29 +98,29 @@ app.post("/api/send-request", async (c) => {
   })
 
   const checkMatch = await prisma.user.findUnique({
-    where:{
-      id:body.requestedId
+    where: {
+      id: body.requestedId
     }
   })
 
-  checkMatch?.requestedIds.map((id)=>{ 
-    if(id === userId){
+  checkMatch?.requestedIds.map((id) => {
+    if (id === userId) {
       const match = prisma.user.update({
-        where:{
-          id:userId
+        where: {
+          id: userId
         },
-        data:{
-          matchStatus:true,
-          matchId:body.requestedId
+        data: {
+          matchStatus: true,
+          matchId: body.requestedId
         }
       })
       const match2 = prisma.user.update({
-        where:{
-          id:body.requestedId
+        where: {
+          id: body.requestedId
         },
-        data:{
-          matchStatus:true,
-          matchId:userId
+        data: {
+          matchStatus: true,
+          matchId: userId
         }
       })
     }
@@ -128,7 +128,7 @@ app.post("/api/send-request", async (c) => {
 
   return c.json({ sucess: true, message: 'match request successfully' })
 })
- 
+
 app.put("/api/send-remove-request", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
@@ -156,29 +156,29 @@ app.put("/api/send-remove-request", async (c) => {
     }
   })
   const checkMatch = await prisma.user.findUnique({
-    where:{
-      id:body.requestedId
+    where: {
+      id: body.requestedId
     }
   })
 
-  checkMatch?.requestedIds.map((id)=>{ 
-    if(id === userId){
+  checkMatch?.requestedIds.map((id) => {
+    if (id === userId) {
       const match = prisma.user.update({
-        where:{
-          id:userId
+        where: {
+          id: userId
         },
-        data:{
-          matchStatus:false,
-          matchId:""
+        data: {
+          matchStatus: false,
+          matchId: ""
         }
       })
       const match2 = prisma.user.update({
-        where:{
-          id:body.requestedId
+        where: {
+          id: body.requestedId
         },
-        data:{
-          matchStatus:false,
-          matchId:""
+        data: {
+          matchStatus: false,
+          matchId: ""
         }
       })
     }
@@ -193,25 +193,25 @@ app.get('/api/requested-array', async (c) => {
 
   const userId = c.get('userId');
   const user = await prisma.user.findUnique({
-    where :{
-      id:userId
+    where: {
+      id: userId
     }
   })
- 
+
   const id_arr = user?.requestedIds
 
   const users = await prisma.user.findMany({
-    where:{
-      id:{
-        in:id_arr
+    where: {
+      id: {
+        in: id_arr
       }
     }
   })
-  
+
   return c.json(users);
 })
 
-app.get('/profile',async (c) => {
+app.get('/profile', async (c) => {
 
   const userId = c.get('userId');
   const prisma = new PrismaClient({
@@ -219,11 +219,33 @@ app.get('/profile',async (c) => {
   }).$extends(withAccelerate());
 
   const user = await prisma.user.findUnique({
-    where:{
-      id:userId
+    where: {
+      id: userId
     }
   })
-  return c.json({user,message:"profile fetched successfully"})
+  return c.json({ user, message: "profile fetched successfully" })
 })
 
-export default app
+app.put('/profile', async (c) => {
+  const userId = c.get('userId');
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const body = await c.req.json();
+  const user = await prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      name: body.name,
+      picture: body.picture,
+      age: body.age,
+      engYear: body.engYear,
+      branch: body.branch,
+      gender: body.gender,
+      insta_id: body.insta_id,
+    }
+  })
+})
+export default app;
