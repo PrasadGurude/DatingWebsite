@@ -40,43 +40,33 @@ app.use("/api", async (c, next) => {
   }
 });
 
-app.post("/sighup", async (c) => {
-  const prisma = new PrismaClient({
+app.post('/signup', async (c) => {
+   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-
   try {
-    const body = await c.req.json()
-    const exhist = await prisma.user.findUnique({
-      where: {
-        email: body.email
-      }
-    })
-    if (exhist) {
-      const token = await sign({ id: exhist.id }, c.env.JWT_SECRET);
-      return c.json({ token, exhist })
+    const body = await c.req.json();
+    const existingUser = await prisma.user.findUnique({
+      where: { email: body.email },
+    });
+
+    if (existingUser) {
+      const token = await sign({ id: existingUser.id }, c.env.JWT_SECRET);
+      return c.json({ success: true, token, user: existingUser });
     }
+
     const newUser = await prisma.user.create({
-      data: {
-        name: body.name,
-        email: body.email,
-        requestedIds: body.requestedIds,
-        matchStatus: body.matchStatus,
-        matchId: body.matchId,
-        picture: body.picture,
-        age: body.age,
-        engYear: body.engYear,
-        branch: body.branch,
-        gender: body.gender,
-        insta_id: body.insta_id
-      }
-    })
+      data: { ...body },
+    });
+
     const token = await sign({ id: newUser.id }, c.env.JWT_SECRET);
-    return c.json({ token, newUser })
+    return c.json({ success: true, token, user: newUser });
   } catch (err) {
-    return c.json({ error: "some problem occured in signup", err })
+    console.error(err);
+    return c.json({ success: false, error: 'Signup failed.' });
   }
-})
+});
+
 
 app.post("/api/send-request", async (c) => {
   const prisma = new PrismaClient({
@@ -97,34 +87,27 @@ app.post("/api/send-request", async (c) => {
     }
   })
 
-  const checkMatch = await prisma.user.findUnique({
+  const checkMatch = await prisma.user.findFirst({
     where: {
-      id: body.requestedId
-    }
-  })
-
-  checkMatch?.requestedIds.map((id) => {
-    if (id === userId) {
-      const match = prisma.user.update({
-        where: {
-          id: userId
-        },
-        data: {
-          matchStatus: true,
-          matchId: body.requestedId
-        }
-      })
-      const match2 = prisma.user.update({
-        where: {
-          id: body.requestedId
-        },
-        data: {
-          matchStatus: true,
-          matchId: userId
-        }
-      })
-    }
-  })
+      id: body.requestedId,
+      requestedIds: {
+        has: userId,
+      },
+    },
+  });
+  
+  if (checkMatch) {
+    await prisma.user.updateMany({
+      where: {
+        id: { in: [userId, body.requestedId] },
+      },
+      data: {
+        matchStatus: true,
+        matchId: body.requestedId,
+      },
+    });
+  }
+  
 
   return c.json({ sucess: true, message: 'match request successfully' })
 })
@@ -211,7 +194,7 @@ app.get('/api/requested-array', async (c) => {
   return c.json(users);
 })
 
-app.get('/profile', async (c) => {
+app.get('/api/profile', async (c) => {
 
   const userId = c.get('userId');
   const prisma = new PrismaClient({
@@ -226,7 +209,7 @@ app.get('/profile', async (c) => {
   return c.json({ user, message: "profile fetched successfully" })
 })
 
-app.put('/profile', async (c) => {
+app.put('/api/profile', async (c) => {
   const userId = c.get('userId');
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
