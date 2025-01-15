@@ -17,7 +17,7 @@ const app = new Hono<{
 
 app.use(cors())
 
-app.use("/api", async (c, next) => {
+app.use("/api/*", async (c, next) => {
   const jwt = c.req.header('Authorization');
   if (!jwt) {
     c.status(401);
@@ -41,7 +41,7 @@ app.use("/api", async (c, next) => {
 });
 
 app.post('/signup', async (c) => {
-   const prisma = new PrismaClient({
+  const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   try {
@@ -95,7 +95,7 @@ app.post("/api/send-request", async (c) => {
       },
     },
   });
-  
+
   if (checkMatch) {
     await prisma.user.updateMany({
       where: {
@@ -107,7 +107,7 @@ app.post("/api/send-request", async (c) => {
       },
     });
   }
-  
+
 
   return c.json({ sucess: true, message: 'match request successfully' })
 })
@@ -117,6 +117,7 @@ app.put("/api/send-remove-request", async (c) => {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
+ try{
   const userId = c.get('userId');
 
   const user = await prisma.user.findUnique({
@@ -142,7 +143,7 @@ app.put("/api/send-remove-request", async (c) => {
     where: {
       id: body.requestedId
     }
-  })
+  }) 
 
   checkMatch?.requestedIds.map((id) => {
     if (id === userId) {
@@ -167,6 +168,10 @@ app.put("/api/send-remove-request", async (c) => {
     }
   })
   return c.json({ sucess: true, message: 'match request successfully send' })
+ }catch(err){
+   console.error(err);
+   return c.json({ message: "match request removal failed failed" })
+ }
 })
 
 app.get('/api/requested-array', async (c) => {
@@ -196,39 +201,49 @@ app.get('/api/requested-array', async (c) => {
 
 app.get('/api/profile', async (c) => {
 
-  const userId = c.get('userId');
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
+  try {
+    const userId = c.get('userId');
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env?.DATABASE_URL,
+    }).$extends(withAccelerate());
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId
-    }
-  })
-  return c.json({ user, message: "profile fetched successfully" })
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId
+      }
+    })
+    return c.json({ user, message: "profile fetched successfully 1" })
+
+  } catch (err) {
+    console.error(err);
+    return c.json({ message: "profile not found ", error: err })
+  }
 })
 
 app.put('/api/profile', async (c) => {
-  const userId = c.get('userId');
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const body = await c.req.json();
-  const user = await prisma.user.update({
-    where: {
-      id: userId
-    },
-    data: {
-      name: body.name,
-      picture: body.picture,
-      age: body.age,
-      engYear: body.engYear,
-      branch: body.branch,
-      gender: body.gender,
-      insta_id: body.insta_id,
+ 
+
+  try {
+    const userId = c.get('userId');
+    if (!userId) {
+      return c.json({ success: false, error: 'User ID is missing or invalid.' }, 400);
     }
-  })
+    const body = await c.req.json();
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId
+      },
+      data: body 
+    })
+    return c.json({ message: "profile Updated ", user:updatedUser })
+  } catch (err) {
+    console.error(err);
+    return c.json({ message: "profile updation failed ", error: err })
+  }
 })
 export default app;

@@ -17,7 +17,7 @@ model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String   @default("jony")
-  requestedIds String[]
+  requestedIds String[] @default([])
   matchStatus  Boolean  @default(false)
   matchId      String   @default("")
   picture      String?
