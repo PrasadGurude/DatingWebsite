@@ -1,12 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.jpg'
+import { GoogleLogin } from '@react-oauth/google';
 
 interface HeaderProps {
   status: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ status }) => {
+  
+ 
   return (
     <header className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 flex justify-between items-center shadow-lg rounded-md mb-4">
       <div className="flex items-center">
@@ -19,7 +22,9 @@ const Header: React.FC<HeaderProps> = ({ status }) => {
         </nav>
       </div>
       <div className="flex items-center">        
-        <Link to="/login" className="hover:text-pink-200 transition duration-300 mr-4">Login or Signup</Link>
+       { status
+        ? <button className="hover:text-pink-200 bg-red-400 p-2 rounded-xl hover:bg-red-500 transition duration-300 mr-4"> LogOut  </button>
+        : null}
       </div>
     </header>
   );
