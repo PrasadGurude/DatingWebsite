@@ -67,7 +67,6 @@ app.post('/signup', async (c) => {
   }
 });
 
-
 app.post("/api/send-request", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
@@ -75,19 +74,21 @@ app.post("/api/send-request", async (c) => {
 
   try {
     const userId = c.get('userId');
-
     const body = await c.req.json();
+
+    // Add the requestedId to the current user's requestedIds array
     const updateArr = await prisma.user.update({
       where: {
-        id: userId
+        id: userId,
       },
       data: {
         requestedIds: {
-          push: body.requestedId
-        }
-      }
-    })
+          push: body.requestedId,
+        },
+      },
+    });
 
+    // Check if there's a mutual match
     const checkMatch = await prisma.user.findFirst({
       where: {
         id: body.requestedId,
@@ -98,24 +99,30 @@ app.post("/api/send-request", async (c) => {
     });
 
     if (checkMatch) {
-      await prisma.user.updateMany({
-        where: {
-          id: { in: [userId, body.requestedId] },
-        },
+      // Update the matchId for both users
+      await prisma.user.update({
+        where: { id: userId },
         data: {
           matchStatus: true,
-          matchId: body.requestedId,
+          matchId: body.requestedId, // Assign requestedId to user's matchId
+        },
+      });
+
+      await prisma.user.update({
+        where: { id: body.requestedId },
+        data: {
+          matchStatus: true,
+          matchId: userId, // Assign userId to requested user's matchId
         },
       });
     }
 
-
-    return c.json({ sucess: true, message: 'match request successfully' })
+    return c.json({ success: true, message: 'Match request successfully sent' , user: updateArr});
   } catch (err) {
     console.error(err);
-    return c.json({ message: "match request failed" })
+    return c.json({ success: false, message: 'Match request failed' });
   }
-})
+});
 
 app.put("/api/send-remove-request", async (c) => {
   const prisma = new PrismaClient({
@@ -134,7 +141,7 @@ app.put("/api/send-remove-request", async (c) => {
     }
 
     const body = await c.req.json();
-    const updateRightSwipeArray = await prisma.user.update({
+    const updateArr = await prisma.user.update({
       where: {
         id: userId
       },
@@ -172,7 +179,7 @@ app.put("/api/send-remove-request", async (c) => {
     //     })
     //   }
     // })
-    if (updateRightSwipeArray?.matchId === body.requiredId) {
+    if (updateArr.matchId === body.requestedId) {
       await prisma.user.updateMany({
         where: {
           id: { in: [userId, body.requestedId] }
@@ -183,7 +190,7 @@ app.put("/api/send-remove-request", async (c) => {
         }
       })
     }
-    return c.json({ sucess: true, message: 'match request successfully send' })
+    return c.json({ sucess: true, message: 'remove request successfully send' ,user: updateArr });
   } catch (err) {
     console.error(err);
     return c.json({ message: "match request removal failed failed" })
@@ -195,7 +202,8 @@ app.get('/api/requested-array', async (c) => {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const userId = c.get('userId');
+  try{
+    const userId = c.get('userId');
   const user = await prisma.user.findUnique({
     where: {
       id: userId
@@ -212,7 +220,11 @@ app.get('/api/requested-array', async (c) => {
     }
   })
 
-  return c.json(users);
+  return c.json({users, message: "requested array fetched successfully"});
+  }catch(err){
+    console.error(err);
+    return c.json({message: "requested array not found", error: err});
+  }
 })
 
 app.get('/api/profile', async (c) => {
@@ -254,7 +266,7 @@ app.put('/api/profile', async (c) => {
       where: {
         id: userId
       },
-      data: body
+      data: {...body}
     })
     return c.json({ message: "profile Updated ", user: updatedUser })
   } catch (err) {
