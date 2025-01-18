@@ -1,15 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const Profile: React.FC = () => {
-  const [user, setUser] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+interface ProfileProps {
+  isAuthenticated: boolean;
+}
+interface User {
+  name: string;
+  email: string;
+  profilePic: string;
+  age: number;
+  engYear: number;
+  branch: string;
+  gender: string;
+  instaProfile: string;
+}
+
+const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
+  const [user, setUser] = useState<User>({
+    name: '',
+    email: '',
     age: 18,
-    gender: 'Male',
-    branch: 'CE',
+    profilePic: '',
     engYear: 1,
-    instaProfile: 'https://instagram.com/johndoe',
+    branch: '',
+    gender: '',
+    instaProfile: ''
   });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetch(`http://localhost:8787/api/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data)
+        setUser({...user ,...data.user})
+      })
+    }
+  },[isAuthenticated])
+
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -26,6 +59,19 @@ const Profile: React.FC = () => {
   };
 
   const handleSave = () => {
+    fetch('http://localhost:8787/api/profile', {
+      method: 'PUT',
+      headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(user)
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data)
+      setUser({...user ,...data.user})
+    })
     setIsEditing(false);
     // Save the updated user information to the server or local storage here
   };
@@ -40,7 +86,7 @@ const Profile: React.FC = () => {
             <input
               type="text"
               name="name"
-              value={user.name}
+              value={user.name ||""}
               onChange={handleChange}
               className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />

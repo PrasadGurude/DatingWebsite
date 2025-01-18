@@ -8,7 +8,7 @@ import Profile from './components/Profile'
 import All from './components/All'
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -20,12 +20,12 @@ function App() {
   return (
     <div className="App ">
       <BrowserRouter>
-        <Header  status={isAuthenticated} />
+        <Header  isAuthenticated={isAuthenticated} />
         <Routes>
           <Route path='/' element={<Navigate to='/home' />}></Route>
-          <Route path='/home' element={<Home />}></Route>
+          <Route path='/home' element={<Home isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />}></Route>
           <Route path='/about' element={<About />}></Route>
-          <Route path='/profile' element={isAuthenticated ? <Profile /> : <Navigate to='/home' />}></Route>
+          <Route path='/profile' element={isAuthenticated ? <Profile isAuthenticated={isAuthenticated} /> : <Navigate to='/home' />}></Route>
           <Route path='/all-students' element={isAuthenticated ? <All /> : <Navigate to='/home' />}></Route>
         </Routes>
       </BrowserRouter>

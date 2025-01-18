@@ -179,6 +179,7 @@ app.put("/api/send-remove-request", async (c) => {
     //     })
     //   }
     // })
+    
     if (updateArr.matchId === body.requestedId) {
       await prisma.user.updateMany({
         where: {
