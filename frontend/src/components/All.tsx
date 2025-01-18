@@ -17,7 +17,14 @@ function All() {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/requested-array')
+    fetch('http://localhost:8000/api/requested-array',{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ page: page})
+    })
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
