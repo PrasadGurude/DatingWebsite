@@ -117,7 +117,7 @@ app.post("/api/send-request", async (c) => {
       });
     }
 
-    return c.json({ success: true, message: 'Match request successfully sent' , user: updateArr});
+    return c.json({ success: true, message: 'Match request successfully sent', user: updateArr });
   } catch (err) {
     console.error(err);
     return c.json({ success: false, message: 'Match request failed' });
@@ -179,7 +179,7 @@ app.put("/api/send-remove-request", async (c) => {
     //     })
     //   }
     // })
-    
+
     if (updateArr.matchId === body.requestedId) {
       await prisma.user.updateMany({
         where: {
@@ -191,10 +191,43 @@ app.put("/api/send-remove-request", async (c) => {
         }
       })
     }
-    return c.json({ sucess: true, message: 'remove request successfully send' ,user: updateArr });
+    return c.json({ sucess: true, message: 'remove request successfully send', user: updateArr });
   } catch (err) {
     console.error(err);
     return c.json({ message: "match request removal failed failed" })
+  }
+})
+
+app.get('/api/all-users', async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const userId = c.get('userId');
+    const body = await c.req.json();
+    // const user = await prisma.user.findUnique({
+    //   where: {
+    //     id: userId
+    //   }
+    const page = body.page || 1;
+    const pageSize = body.pageSize || 10;
+    const offset = (page-1) * pageSize;
+
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          not: userId
+        }
+      },
+      skip: offset,
+      take: 10
+    })
+
+    return c.json({ users, message: "all users fetched successfully" });
+  } catch (err) {
+    console.error(err);
+    return c.json({ message: "all users not found", error: err });
   }
 })
 
@@ -203,28 +236,35 @@ app.get('/api/requested-array', async (c) => {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  try{
+  try {
+    const body = await c.req.json();
+
     const userId = c.get('userId');
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId
-    }
-  })
-
-  const id_arr = user?.requestedIds
-
-  const users = await prisma.user.findMany({
-    where: {
-      id: {
-        in: id_arr
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId
       }
-    }
-  })
+    })
+    const page = body.page || 1;
+    const pageSize = body.pageSize || 10;
+    const offset = (page-1) * pageSize;
 
-  return c.json({users, message: "requested array fetched successfully"});
-  }catch(err){
+    const id_arr = user?.requestedIds
+
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          in: id_arr
+        }
+      },
+      skip: offset,
+      take: 10
+    })
+
+    return c.json({ users, message: "requested array fetched successfully" });
+  } catch (err) {
     console.error(err);
-    return c.json({message: "requested array not found", error: err});
+    return c.json({ message: "requested array not found", error: err });
   }
 })
 
@@ -267,7 +307,7 @@ app.put('/api/profile', async (c) => {
       where: {
         id: userId
       },
-      data: {...body}
+      data: { ...body }
     })
     return c.json({ message: "profile Updated ", user: updatedUser })
   } catch (err) {
