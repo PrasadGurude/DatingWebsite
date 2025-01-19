@@ -22,7 +22,7 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
     profilePic: '',
     engYear: 1,
     branch: '',
-    gender: '',
+    gender: "",
     instaProfile: ''
   });
 
@@ -35,13 +35,13 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data)
-        setUser({...user ,...data.user})
-      })
+        .then(res => res.json())
+        .then(data => {
+          console.log(data)
+          setUser({ ...user, ...data.user })
+        })
     }
-  },[isAuthenticated])
+  }, [isAuthenticated])
 
 
   const [isEditing, setIsEditing] = useState(false);
@@ -62,16 +62,16 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
     fetch('http://localhost:8787/api/profile', {
       method: 'PUT',
       headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
       body: JSON.stringify(user)
     })
-    .then(res => res.json())
-    .then(data => {
-      console.log(data)
-      setUser({...user ,...data.user})
-    })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data)
+        setUser({ ...user, ...data.user })
+      })
     setIsEditing(false);
     // Save the updated user information to the server or local storage here
   };
@@ -86,7 +86,7 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
             <input
               type="text"
               name="name"
-              value={user.name ||""}
+              value={user.name || ""}
               onChange={handleChange}
               className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />

@@ -26,7 +26,7 @@ function App() {
           <Route path='/home' element={<Home isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />}></Route>
           <Route path='/about' element={<About />}></Route>
           <Route path='/profile' element={isAuthenticated ? <Profile isAuthenticated={isAuthenticated} /> : <Navigate to='/home' />}></Route>
-          <Route path='/all-students' element={isAuthenticated ? <All /> : <Navigate to='/home' />}></Route>
+          <Route path='/all-students' element={isAuthenticated ? <All isAuthenticated={isAuthenticated}/> : <Navigate to='/home' />}></Route>
         </Routes>
       </BrowserRouter>
 
