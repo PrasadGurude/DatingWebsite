@@ -149,7 +149,7 @@ app.put("/api/send-remove-request", async (c) => {
     });
 
     if (!user) {
-      return c.json({ message: "User not found." }, 404);
+      return c.json({success: false, message: "User not found." }, 404);
     }
 
     const body = await c.req.json();
@@ -164,7 +164,6 @@ app.put("/api/send-remove-request", async (c) => {
       }
     })
 
-
     if (updateArr.matchId === body.requestedId) {
       await prisma.user.updateMany({
         where: {
@@ -176,7 +175,7 @@ app.put("/api/send-remove-request", async (c) => {
         }
       })
     }
-    return c.json({ sucess: true, message: 'remove request successfully send', user: updateArr });
+    return c.json({ success: true, message: 'remove request successfully send', user: updateArr });
   } catch (err) {
     console.error(err);
     return c.json({success: false, message: "match request removal failed failed" })
