@@ -8,7 +8,7 @@ interface User {
   engYear: number;
   branch: string;
   gender: string;
-  instaProfile: string;
+  insta_id: string;
 }
 
 interface AllusersProps {
@@ -16,12 +16,11 @@ interface AllusersProps {
   searchList: User[];
 }
 
-const Allusers: React.FC<AllusersProps> = ({ isAuthenticated , searchList }) => {
-
-  
+const Allusers: React.FC<AllusersProps> = ({ isAuthenticated, searchList }) => {
 
   const [list, setList] = useState<User[]>(searchList);
   const [page, setPage] = useState(1)
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated && searchList.length == 0) {
@@ -36,12 +35,19 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated , searchList }) => 
         .then((data) => {
           console.log(data);
           setList(data.users);
+          setPopupMessage(data.message);
+          setTimeout(() => setPopupMessage(null), 3000);
         });
     }
   }, [page]);
 
   return (
-    <div>
+    <div className='w-full'>
+      {popupMessage ? (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg z-50 animate-bounce">
+          {popupMessage}
+        </div>
+      ) : null}
       {/* List Section */}
       <div className="bg-white shadow-md p-2 rounded-lg w-full max-w-4xl">
         {
@@ -58,10 +64,27 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated , searchList }) => 
                 </div>
                 <p className="text-gray-600"> {item.email} </p>
                 <div className="flex space-x-2">
-                  <button className="bg-white text-blue-500 px-2 py-1 rounded-full hover:bg-gray-100 transition duration-300 border border-gray-300">
+                  <button
+                  onClick={()=>{
+                    window.open(`${item.insta_id}`)
+                  }}
+                  className="bg-white text-blue-500 px-2 py-1 rounded-full hover:bg-gray-100 transition duration-300 border border-gray-300">
                     Instagram
                   </button>
-                  <button className="bg-blue-500 text-white px-2 py-1 rounded-full hover:bg-blue-600 transition duration-300">
+                  <button
+                  onClick={()=>{
+                    fetch(`http://localhost:8787/api/send-request`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      },
+                      body: JSON.stringify({
+                        requestedId: item.email
+                      })
+                    })
+                  }}
+                   className="bg-blue-500 text-white px-2 py-1 rounded-full hover:bg-blue-600 transition duration-300">
                     Send
                   </button>
                 </div>

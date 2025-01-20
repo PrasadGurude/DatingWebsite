@@ -11,7 +11,7 @@ interface User {
   engYear: number;
   branch: string;
   gender: string;
-  instaProfile: string;
+  insta_id: string;
 }
 
 const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
@@ -23,8 +23,9 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
     engYear: 1,
     branch: '',
     gender: "",
-    instaProfile: ''
+    insta_id: ''
   });
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -39,6 +40,8 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
         .then(data => {
           console.log(data)
           setUser({ ...user, ...data.user })
+          setPopupMessage(data.message);
+            setTimeout(() => setPopupMessage(null), 3000);
         })
     }
   }, [isAuthenticated])
@@ -78,6 +81,11 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
 
   return (
     <div className="bg-gradient-to-r from-gray-100 via-blue-50 to-gray-100 min-h-screen flex items-center justify-center p-8">
+      {popupMessage ? (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg z-50 animate-bounce">
+          {popupMessage}
+        </div>
+      ) : null}
       <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg text-center max-w-md w-full">
         <h1 className="text-4xl font-bold text-gray-800 mb-6">Profile</h1>
         <div className="text-left">
@@ -173,18 +181,18 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
             <input
               type="text"
               name="instaProfile"
-              value={user.instaProfile}
+              value={user.insta_id}
               onChange={handleChange}
               className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           ) : (
             <a
-              href={user.instaProfile}
+              href={user.insta_id}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-gray-100 p-2 mb-4 rounded-lg block text-blue-500 hover:text-blue-700 transition duration-300"
             >
-              {user.instaProfile}
+              {user.insta_id}
             </a>
           )}
         </div>

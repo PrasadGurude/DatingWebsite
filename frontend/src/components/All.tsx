@@ -16,7 +16,7 @@ const All: React.FC<AllProps> = ({ isAuthenticated }) => {
     engYear: number;
     branch: string;
     gender: string;
-    instaProfile: string;
+    insta_id: string;
   }
 
   // const [list, setList] = useState<User[]>([]);
@@ -24,6 +24,7 @@ const All: React.FC<AllProps> = ({ isAuthenticated }) => {
   const [swithc, setSwithc] = useState(true);
   const [searchList, setSearchList] = useState<User[]>([])
   const [search, setSearch] = useState('')
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   // useEffect(() => {
   //   fetch('http://localhost:8000/api/requested-array',{
@@ -42,7 +43,13 @@ const All: React.FC<AllProps> = ({ isAuthenticated }) => {
   // }, [page]);
 
   return (
+
     <div className="bg-gradient-to-r from-gray-100 via-blue-50 to-gray-100 min-h-screen flex flex-col items-center justify-start py-1 px-4">
+      {popupMessage ? (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white py-2 px-4 rounded shadow-md z-50">
+          {popupMessage}
+        </div>
+      ) : null}
       {/* Header Section */}
       <div className="bg-white shadow-md p-2 px-4 rounded-lg w-full max-w-4xl mb-2 flex justify-between items-center">
         <div className="flex space-x-4">
@@ -65,17 +72,19 @@ const All: React.FC<AllProps> = ({ isAuthenticated }) => {
           />
           <button
             onClick={() => {
-              fetch(`http://localhost:8000/api/${search}`, {
-                method: 'POST',
+              fetch(`http://localhost:8787/api/search/${search}`, {
+                method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
                   "Authorization": `Bearer ${localStorage.getItem('token')}`
                 },
               })
                 .then((res) => res.json())
-                .then((data) => { 
+                .then((data) => {
                   console.log(data)
                   setSearchList(data.users)
+                  setPopupMessage(data.message);
+                  setTimeout(() => setPopupMessage(null), 3000);
                 })
             }
             }

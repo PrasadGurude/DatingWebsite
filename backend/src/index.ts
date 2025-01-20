@@ -77,14 +77,26 @@ app.post("/api/send-request", async (c) => {
     const body = await c.req.json();
 
     // Add the requestedId to the current user's requestedIds array
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return c.json({ success: false, message: 'User not found.' });
+    }
+
+    if (user.requestedIds.includes(body.requestedId)) {
+      return c.json({ success: false, message: 'Request already sent.' });
+    }
+
     const updateArr = await prisma.user.update({
       where: {
-        id: userId,
+      id: userId,
       },
       data: {
-        requestedIds: {
-          push: body.requestedId,
-        },
+      requestedIds: {
+        push: body.requestedId,
+      },
       },
     });
 
@@ -151,34 +163,7 @@ app.put("/api/send-remove-request", async (c) => {
         }
       }
     })
-    // const checkMatch = await prisma.user.findUnique({
-    //   where: {
-    //     id: body.requestedId
-    //   }
-    // }) 
 
-    // checkMatch?.requestedIds.map((id) => {
-    //   if (id === userId) {
-    //     const match = prisma.user.update({
-    //       where: {
-    //         id: userId
-    //       },
-    //       data: {
-    //         matchStatus: false,
-    //         matchId: ""
-    //       }
-    //     })
-    //     const match2 = prisma.user.update({
-    //       where: {
-    //         id: body.requestedId
-    //       },
-    //       data: {
-    //         matchStatus: false,
-    //         matchId: ""
-    //       }
-    //     })
-    //   }
-    // })
 
     if (updateArr.matchId === body.requestedId) {
       await prisma.user.updateMany({
@@ -194,7 +179,7 @@ app.put("/api/send-remove-request", async (c) => {
     return c.json({ sucess: true, message: 'remove request successfully send', user: updateArr });
   } catch (err) {
     console.error(err);
-    return c.json({ message: "match request removal failed failed" })
+    return c.json({success: false, message: "match request removal failed failed" })
   }
 })
 
@@ -220,10 +205,10 @@ app.get('/api/all-users/:page', async (c) => {
       take: 10
     })
 
-    return c.json({ users, message: "all users fetched successfully" });
+    return c.json({success: true, users, message: "all users fetched successfully" });
   } catch (err) {
     console.error(err);
-    return c.json({ message: "all users not found", error: err });
+    return c.json({success: false, message: "all users not found", error: err });
   }
 })
 
@@ -256,10 +241,10 @@ app.get('/api/requested-array/:page', async (c) => {
       take: 10
     })
 
-    return c.json({ users, message: "requested array fetched successfully" });
+    return c.json({success: true, users, message: "requested array fetched successfully" });
   } catch (err) {
     console.error(err);
-    return c.json({ message: "requested array not found", error: err });
+    return c.json({success: false, message: "requested array not found", error: err });
   }
 })
 
@@ -282,14 +267,14 @@ app.get('api/search/:name', async (c) => {
     });
 
     if (!users) {
-      return c.json({ message: "searched user not found" });
+      return c.json({success: false, message: "searched user not found" });
     }
 
     if(users.length > 10) {
-      return c.json({ message: "too many users found, please be more specific" });
+      return c.json({success: false, message: "too many users found, please be more specific" });
     }
 
-    return c.json({ users, message: "searched user fetched successfully" });
+    return c.json({success: true, users, message: "searched user fetched successfully" });
   } catch (err) {
     console.error(err);
     return c.json({ message: "error while searched users ", error: err });
@@ -309,11 +294,11 @@ app.get('/api/profile', async (c) => {
         id: userId
       }
     })
-    return c.json({ user, message: "profile fetched successfully 1" })
+    return c.json({success: true, user, message: "profile fetched successfully 1" })
 
   } catch (err) {
     console.error(err);
-    return c.json({ message: "profile not found ", error: err })
+    return c.json({success: false, message: "profile not found ", error: err })
   }
 })
 
@@ -337,10 +322,10 @@ app.put('/api/profile', async (c) => {
       },
       data: { ...body }
     })
-    return c.json({ message: "profile Updated ", user: updatedUser })
+    return c.json({success: true, message: "profile Updated ", user: updatedUser })
   } catch (err) {
     console.error(err);
-    return c.json({ message: "profile updation failed ", error: err })
+    return c.json({success: false, message: "profile updation failed ", error: err })
   }
 })
 export default app;

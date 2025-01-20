@@ -14,11 +14,12 @@ const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
         engYear: number;
         branch: string;
         gender: string;
-        instaProfile: string;
+        insta_id: string;
     }
 
     const [list, setList] = useState<User[]>([]);
     const [page, setPage] = useState(1)
+    const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -33,13 +34,20 @@ const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
                 .then((data) => {
                     console.log(data);
                     setList(data.users);
+                    setPopupMessage(data.message);
+                    setTimeout(() => setPopupMessage(null), 3000);
                 });
         }
     }, [page]);
 
     return (
-        <div>
+        <div className='w-full'>
             {/* List Section */}
+            {popupMessage ? (
+                <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white py-2 px-4 rounded shadow-md z-50">
+                    {popupMessage}
+                </div>
+            ) : null}
             <div className="bg-white shadow-md p-2 rounded-lg w-full max-w-4xl">
                 {
                     list.map((item, index) => {
@@ -55,11 +63,28 @@ const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
                                 </div>
                                 <p className="text-gray-600"> {item.email} </p>
                                 <div className="flex space-x-2">
-                                    <button className="bg-white text-blue-500 px-2 py-1 rounded-full hover:bg-gray-100 transition duration-300 border border-gray-300">
+                                    <button
+                                     onClick={()=>{
+                                        window.open(`${item.insta_id}`)
+                                      }}
+                                     className="bg-white text-blue-500 px-2 py-1 rounded-full hover:bg-gray-100 transition duration-300 border border-gray-300">
                                         Instagram
                                     </button>
-                                    <button className="bg-blue-500 text-white px-2 py-1 rounded-full hover:bg-blue-600 transition duration-300">
-                                        Send
+                                    <button
+                                    onClick={()=>{
+                                        fetch(`http://localhost:8787/api/send-remove-request`, {
+                                          method: 'PUT',
+                                          headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                          },
+                                          body: JSON.stringify({
+                                            requestedId: item.email
+                                          })
+                                        })
+                                      }}
+                                     className="bg-blue-500 text-white px-2 py-1 rounded-full hover:bg-blue-600 transition duration-300">
+                                        remove
                                     </button>
                                 </div>
                             </div>
