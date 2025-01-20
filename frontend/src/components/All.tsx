@@ -3,25 +3,27 @@ import Allusers from './Allusers';
 import Requested from './Requested';
 
 interface AllProps {
-  isAuthenticated:boolean;
+  isAuthenticated: boolean;
 }
 
-const All:React.FC<AllProps> = ({isAuthenticated})=> {
+const All: React.FC<AllProps> = ({ isAuthenticated }) => {
 
-  // interface User {
-  //   name: string;
-  //   email: string;
-  //   age: number;
-  //   picture: string;
-  //   engYear: number;
-  //   branch: string;
-  //   gender: string;
-  //   instaProfile: string;
-  // }
+  interface User {
+    name: string;
+    email: string;
+    age: number;
+    picture: string;
+    engYear: number;
+    branch: string;
+    gender: string;
+    instaProfile: string;
+  }
 
   // const [list, setList] = useState<User[]>([]);
   // const [page, setPage] = useState(1)
   const [swithc, setSwithc] = useState(true);
+  const [searchList, setSearchList] = useState<User[]>([])
+  const [search, setSearch] = useState('')
 
   // useEffect(() => {
   //   fetch('http://localhost:8000/api/requested-array',{
@@ -38,27 +40,51 @@ const All:React.FC<AllProps> = ({isAuthenticated})=> {
   //       setList(data);
   //     });
   // }, [page]);
-  
+
   return (
     <div className="bg-gradient-to-r from-gray-100 via-blue-50 to-gray-100 min-h-screen flex flex-col items-center justify-start py-1 px-4">
       {/* Header Section */}
       <div className="bg-white shadow-md p-2 px-4 rounded-lg w-full max-w-4xl mb-2 flex justify-between items-center">
         <div className="flex space-x-4">
-          <button onClick={()=>setSwithc(true)} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
+          <button onClick={() => setSwithc(true)} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
             All Users
           </button>
-          <button onClick={()=>setSwithc(false)} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
+          <button onClick={() => setSwithc(false)} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
             Requested
           </button>
         </div>
-        <input
-          type="text"
-          placeholder="Search"
-          className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 w-60"
-        />
+        <div className='flex items-center space-x-2'>
+          <input
+            type="text"
+            placeholder="Search"
+            onChange={(e) => {
+              setSearch(e.target.value)
+              console.log(e.target.value)
+            }}
+            className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 w-60"
+          />
+          <button
+            onClick={() => {
+              fetch(`http://localhost:8000/api/${search}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  "Authorization": `Bearer ${localStorage.getItem('token')}`
+                },
+              })
+                .then((res) => res.json())
+                .then((data) => { 
+                  console.log(data)
+                  setSearchList(data.users)
+                })
+            }
+            }
+            className='bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300'>Search
+          </button>
+        </div>
       </div>
 
-      {swithc? <Allusers isAuthenticated={isAuthenticated} /> : <Requested isAuthenticated={isAuthenticated} />}
+      {swithc ? <Allusers isAuthenticated={isAuthenticated} searchList={searchList} /> : <Requested isAuthenticated={isAuthenticated} />}
 
       {/* List Section */}
       {/* <div className="bg-white shadow-md p-2 rounded-lg w-full max-w-4xl">
@@ -88,7 +114,7 @@ const All:React.FC<AllProps> = ({isAuthenticated})=> {
           })
         }
       </div> */}
-      
+
       {/* Pagination Section */}
       {/* <div className="flex justify-center items-center mt-4">
         <button

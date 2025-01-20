@@ -22,18 +22,17 @@ const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            fetch('http://localhost:8000/api/requested-array', {
+            fetch(`http://localhost:8787/api/requested-array/${page}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ page: page })
             })
                 .then((res) => res.json())
                 .then((data) => {
                     console.log(data);
-                    setList(data);
+                    setList(data.users);
                 });
         }
     }, [page]);

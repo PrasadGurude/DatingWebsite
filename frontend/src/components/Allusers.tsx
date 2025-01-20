@@ -1,39 +1,41 @@
 import React, { useEffect, useState } from 'react'
 
-interface AllusersProps {
-  isAuthenticated: boolean;
+interface User {
+  name: string;
+  email: string;
+  age: number;
+  picture: string;
+  engYear: number;
+  branch: string;
+  gender: string;
+  instaProfile: string;
 }
 
-const Allusers: React.FC<AllusersProps> = ({ isAuthenticated }) => {
+interface AllusersProps {
+  isAuthenticated: boolean;
+  searchList: User[];
+}
 
-  interface User {
-    name: string;
-    email: string;
-    age: number;
-    picture: string;
-    engYear: number;
-    branch: string;
-    gender: string;
-    instaProfile: string;
-  }
+const Allusers: React.FC<AllusersProps> = ({ isAuthenticated , searchList }) => {
 
-  const [list, setList] = useState<User[]>([]);
+  
+
+  const [list, setList] = useState<User[]>(searchList);
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetch('http://localhost:8000/api/all-users', {
+    if (isAuthenticated && searchList.length == 0) {
+      fetch(`http://localhost:8787/api/all-users/${page}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ page: page })
+        }
       })
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
-          setList(data);
+          setList(data.users);
         });
     }
   }, [page]);
@@ -85,7 +87,7 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated }) => {
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300  w-24"
           onClick={() => {
-            if (page < list.length) {
+            if (10 == list.length) {
               setPage(page + 1);
             }
           }}

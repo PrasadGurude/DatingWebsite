@@ -20,7 +20,13 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated }) => {
       </div>
       <div className="flex items-center">        
        { isAuthenticated
-        ? <button className="hover:text-pink-200 bg-red-400 p-2 rounded-xl hover:bg-red-500 transition duration-300 mr-4"> LogOut  </button>
+        ? <button
+          onClick={() => {
+            localStorage.removeItem('token');
+            window.location.href = '/home';
+          }} 
+        className="hover:text-pink-200 bg-red-400 p-2 rounded-xl hover:bg-red-500 transition duration-300 mr-4"> LogOut  
+        </button>
         : null}
       </div>
     </header>

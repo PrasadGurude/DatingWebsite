@@ -8,7 +8,7 @@ import Profile from './components/Profile'
 import All from './components/All'
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('token')

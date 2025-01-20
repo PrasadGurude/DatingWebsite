@@ -198,20 +198,16 @@ app.put("/api/send-remove-request", async (c) => {
   }
 })
 
-app.get('/api/all-users', async (c) => {
+app.get('/api/all-users/:page', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
   try {
     const userId = c.get('userId');
-    const body = await c.req.json();
-    // const user = await prisma.user.findUnique({
-    //   where: {
-    //     id: userId
-    //   }
-    const page = body.page || 1;
-    const pageSize = body.pageSize || 10;
+    const page = Number(c.req.param('page')) || 1;
+
+    const pageSize = 10;
     const offset = (page-1) * pageSize;
 
     const users = await prisma.user.findMany({
@@ -231,22 +227,21 @@ app.get('/api/all-users', async (c) => {
   }
 })
 
-app.get('/api/requested-array', async (c) => {
+app.get('/api/requested-array/:page', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
   try {
-    const body = await c.req.json();
-
+    
+    const page = Number(c.req.param('page')) || 1;
     const userId = c.get('userId');
     const user = await prisma.user.findUnique({
       where: {
         id: userId
       }
     })
-    const page = body.page || 1;
-    const pageSize = body.pageSize || 10;
+    const pageSize = 10;
     const offset = (page-1) * pageSize;
 
     const id_arr = user?.requestedIds
@@ -265,6 +260,39 @@ app.get('/api/requested-array', async (c) => {
   } catch (err) {
     console.error(err);
     return c.json({ message: "requested array not found", error: err });
+  }
+})
+
+app.get('api/search/:name', async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  
+
+  try {
+    const userId = c.get('userId');
+    const {name} = c.req.param();
+    const users = await prisma.user.findMany({
+      where: {
+        name: {
+          contains: name,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!users) {
+      return c.json({ message: "searched user not found" });
+    }
+
+    if(users.length > 10) {
+      return c.json({ message: "too many users found, please be more specific" });
+    }
+
+    return c.json({ users, message: "searched user fetched successfully" });
+  } catch (err) {
+    console.error(err);
+    return c.json({ message: "error while searched users ", error: err });
   }
 })
 
