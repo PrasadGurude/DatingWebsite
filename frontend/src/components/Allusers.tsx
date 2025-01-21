@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 interface User {
+  id: string;
   name: string;
   email: string;
   age: number;
@@ -80,8 +81,14 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated, searchList }) => {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                       },
                       body: JSON.stringify({
-                        requestedId: item.email
+                        requestedId: item.id
                       })
+                    })
+                    .then((res) => res.json())
+                    .then((data) => {
+                      console.log(data);
+                      setPopupMessage(data.message);
+                      setTimeout(() => setPopupMessage(null), 3000);
                     })
                   }}
                    className="bg-blue-500 text-white px-2 py-1 rounded-full hover:bg-blue-600 transition duration-300">

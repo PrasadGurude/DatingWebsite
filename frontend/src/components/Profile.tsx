@@ -6,7 +6,7 @@ interface ProfileProps {
 interface User {
   name: string;
   email: string;
-  profilePic: string;
+  picture: string;
   age: number;
   engYear: number;
   branch: string;
@@ -19,7 +19,7 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
     name: '',
     email: '',
     age: 18,
-    profilePic: '',
+    picture: '',
     engYear: 1,
     branch: '',
     gender: "",

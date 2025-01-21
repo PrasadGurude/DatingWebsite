@@ -218,6 +218,7 @@ app.get('/api/requested-array/:page', async (c) => {
 
   try {
     
+    
     const page = Number(c.req.param('page')) || 1;
     const userId = c.get('userId');
     const user = await prisma.user.findUnique({
@@ -228,17 +229,19 @@ app.get('/api/requested-array/:page', async (c) => {
     const pageSize = 10;
     const offset = (page-1) * pageSize;
 
-    const id_arr = user?.requestedIds
-
+    
     const users = await prisma.user.findMany({
       where: {
         id: {
-          in: id_arr
+          in: user?.requestedIds
         }
       },
       skip: offset,
       take: 10
     })
+
+    console.log(user?.requestedIds);
+    
 
     return c.json({success: true, users, message: "requested array fetched successfully" });
   } catch (err) {

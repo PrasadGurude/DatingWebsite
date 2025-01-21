@@ -7,6 +7,7 @@ interface Requestedprops {
 const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
 
     interface User {
+        id:string;
         name: string;
         email: string;
         age: number;
@@ -79,7 +80,7 @@ const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
                                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                                           },
                                           body: JSON.stringify({
-                                            requestedId: item.email
+                                            requestedId: item.id
                                           })
                                         })
                                       }}
