@@ -25,7 +25,7 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated, searchList }) => {
 
   useEffect(() => {
     if (isAuthenticated && searchList.length == 0) {
-      fetch(`http://localhost:8787/api/all-users/${page}`, {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/all-users/${page}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -66,32 +66,32 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated, searchList }) => {
                 <p className="text-gray-600"> {item.email} </p>
                 <div className="flex space-x-2">
                   <button
-                  onClick={()=>{
-                    window.open(`${item.insta_id}`)
-                  }}
-                  className="bg-white text-blue-500 px-2 py-1 rounded-full hover:bg-gray-100 transition duration-300 border border-gray-300">
+                    onClick={() => {
+                      window.open(`${item.insta_id}`)
+                    }}
+                    className="bg-white text-blue-500 px-2 py-1 rounded-full hover:bg-gray-100 transition duration-300 border border-gray-300">
                     Instagram
                   </button>
                   <button
-                  onClick={()=>{
-                    fetch(`http://localhost:8787/api/send-request`, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                      },
-                      body: JSON.stringify({
-                        requestedId: item.id
+                    onClick={() => {
+                      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/send-request`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                          requestedId: item.id
+                        })
                       })
-                    })
-                    .then((res) => res.json())
-                    .then((data) => {
-                      console.log(data);
-                      setPopupMessage(data.message);
-                      setTimeout(() => setPopupMessage(null), 3000);
-                    })
-                  }}
-                   className="bg-blue-500 text-white px-2 py-1 rounded-full hover:bg-blue-600 transition duration-300">
+                        .then((res) => res.json())
+                        .then((data) => {
+                          console.log(data);
+                          setPopupMessage(data.message);
+                          setTimeout(() => setPopupMessage(null), 3000);
+                        })
+                    }}
+                    className="bg-blue-500 text-white px-2 py-1 rounded-full hover:bg-blue-600 transition duration-300">
                     Send
                   </button>
                 </div>

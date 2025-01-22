@@ -24,7 +24,7 @@ const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            fetch(`http://localhost:8787/api/requested-array/${page}`, {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/requested-array/${page}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ const Requested: React.FC<Requestedprops> = ({ isAuthenticated }) => {
                                     </button>
                                     <button
                                     onClick={()=>{
-                                        fetch(`http://localhost:8787/api/send-remove-request`, {
+                                        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/send-remove-request`, {
                                           method: 'PUT',
                                           headers: {
                                             'Content-Type': 'application/json',

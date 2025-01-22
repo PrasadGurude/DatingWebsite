@@ -30,8 +30,7 @@ const Home: React.FC<HomeProps> = ({ isAuthenticated, setIsAuthenticated }) => {
               .then(async data => {
                 console.log(data)
                 if (data.email && data.email.endsWith('@ghrcem.raisoni.net')) {
-                  fetch(`http://localhost:8787/signup`, {
-                    method: 'POST',
+                  fetch(`${import.meta.env.VITE_BACKEND_URL}/signup`, {                    method: 'POST',
                     headers: {
                       'Content-Type': 'application/json'
                     },

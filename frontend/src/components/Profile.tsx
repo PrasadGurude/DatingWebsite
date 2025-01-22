@@ -29,7 +29,7 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetch(`http://localhost:8787/api/profile`, {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/profile`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
   };
 
   const handleSave = () => {
-    fetch('http://localhost:8787/api/profile', {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

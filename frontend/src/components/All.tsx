@@ -9,6 +9,7 @@ interface AllProps {
 const All: React.FC<AllProps> = ({ isAuthenticated }) => {
 
   interface User {
+    id: string;
     name: string;
     email: string;
     age: number;
@@ -72,7 +73,7 @@ const All: React.FC<AllProps> = ({ isAuthenticated }) => {
           />
           <button
             onClick={() => {
-              fetch(`http://localhost:8787/api/search/${search}`, {
+              fetch(`${import.meta.env.VITE_BACKEND_URL}/api/search/${search}`, {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',

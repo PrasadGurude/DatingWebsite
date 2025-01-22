@@ -40,6 +40,10 @@ app.use("/api/*", async (c, next) => {
   }
 });
 
+app.get('/', async (c) => {
+  return c.json({ message: 'Hello, World!' });
+});
+
 app.post('/signup', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
