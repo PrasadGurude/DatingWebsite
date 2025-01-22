@@ -88,6 +88,11 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
       ) : null}
       <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg text-center max-w-md w-full">
         <h1 className="text-4xl font-bold text-gray-800 mb-6">Profile</h1>
+        <img
+          src={user.picture}
+          alt="Profile"
+          className="w-28 h-28 rounded-full mx-auto mb-6"
+        />
         <div className="text-left">
           <label className="block text-gray-700 mb-2">Name</label>
           {isEditing ? (
