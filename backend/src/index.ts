@@ -56,7 +56,7 @@ app.post('/signup', async (c) => {
 
     if (existingUser) {
       const token = await sign({ id: existingUser.id }, c.env.JWT_SECRET);
-      return c.json({ success: true, token, user: existingUser, message: 'User login successful ' });
+      return c.json({ success: true, token, user: existingUser, message: 'User login successful' });
     }
 
     const newUser = await prisma.user.create({
@@ -64,10 +64,10 @@ app.post('/signup', async (c) => {
     });
 
     const token = await sign({ id: newUser.id }, c.env.JWT_SECRET);
-    return c.json({ success: true, token, user: newUser , message: 'User created successfully.' }); 
+    return c.json({ success: true, token, user: newUser , message: 'User created successfully' }); 
   } catch (err) {
     console.error(err);
-    return c.json({ success: false, error: 'Signup failed.' });
+    return c.json({ success: false, error: 'Signup failed' });
   }
 });
 
@@ -90,7 +90,7 @@ app.post("/api/send-request", async (c) => {
     }
 
     if (user.requestedIds.includes(body.requestedId)) {
-      return c.json({ success: false, message: 'Request already sent.' });
+      return c.json({ success: false, message: 'Request already sent' });
     }
 
     const updateArr = await prisma.user.update({
@@ -153,7 +153,7 @@ app.put("/api/send-remove-request", async (c) => {
     });
 
     if (!user) {
-      return c.json({success: false, message: "User not found." }, 404);
+      return c.json({success: false, message: "User not found" }, 404);
     }
 
     const body = await c.req.json();
@@ -300,7 +300,7 @@ app.get('/api/profile', async (c) => {
         id: userId
       }
     })
-    return c.json({success: true, user, message: "profile fetched successfully 1" })
+    return c.json({success: true, user, message: "profile fetched successfully " })
 
   } catch (err) {
     console.error(err);
@@ -318,7 +318,7 @@ app.put('/api/profile', async (c) => {
   try {
     const userId = c.get('userId');
     if (!userId) {
-      return c.json({ success: false, error: 'User ID is missing or invalid.' }, 400);
+      return c.json({ success: false, error: 'User ID is missing or invalid' }, 400);
     }
     const body = await c.req.json();
 
@@ -326,7 +326,7 @@ app.put('/api/profile', async (c) => {
       where: {
         id: userId
       },
-      data: { ...body }
+      data: { ...body,age:parseInt(body.age),engYear:parseInt(body.engYear) }
     })
     return c.json({success: true, message: "profile Updated ", user: updatedUser })
   } catch (err) {
@@ -355,7 +355,7 @@ app.get('/api/status', async (c) => {
           id: user.matchId
         }
       })
-      return c.json({success: true, user:MatcedUser, message: "profile fetched successfully 1" })
+      return c.json({success: true, user:MatcedUser, message: "profile fetched successfully" })
     }
 
     return c.json({success: false, message: "No match found" })
