@@ -56,7 +56,7 @@ app.post('/signup', async (c) => {
 
     if (existingUser) {
       const token = await sign({ id: existingUser.id }, c.env.JWT_SECRET);
-      return c.json({ success: true, token, user: existingUser });
+      return c.json({ success: true, token, user: existingUser, message: 'User login successful ' });
     }
 
     const newUser = await prisma.user.create({
@@ -64,7 +64,7 @@ app.post('/signup', async (c) => {
     });
 
     const token = await sign({ id: newUser.id }, c.env.JWT_SECRET);
-    return c.json({ success: true, token, user: newUser });
+    return c.json({ success: true, token, user: newUser , message: 'User created successfully.' }); 
   } catch (err) {
     console.error(err);
     return c.json({ success: false, error: 'Signup failed.' });
@@ -334,4 +334,35 @@ app.put('/api/profile', async (c) => {
     return c.json({success: false, message: "profile updation failed ", error: err })
   }
 })
+
+app.get('/api/status', async (c) => {
+
+  try {
+    const userId = c.get('userId');
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env?.DATABASE_URL,
+    }).$extends(withAccelerate());
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId
+      }
+    })
+
+    if(user?.matchStatus===true){
+      const MatcedUser = await prisma.user.findFirst({
+        where: {
+          id: user.matchId
+        }
+      })
+      return c.json({success: true, user:MatcedUser, message: "profile fetched successfully 1" })
+    }
+
+    return c.json({success: false, message: "No match found" })
+  } catch (err) {
+    console.error(err);
+    return c.json({success: false, message: "profile not found ", error: err })
+  }
+})
+
 export default app;
