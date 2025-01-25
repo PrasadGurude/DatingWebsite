@@ -26,9 +26,12 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
     insta_id: ''
   });
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false)
+
 
   useEffect(() => {
     if (isAuthenticated) {
+      setLoading(true)
       fetch(`${import.meta.env.VITE_BACKEND_URL}/api/profile`, {
         method: 'GET',
         headers: {
@@ -41,7 +44,8 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
           console.log(data)
           setUser({ ...user, ...data.user })
           setPopupMessage(data.message);
-            setTimeout(() => setPopupMessage(null), 3000);
+          setLoading(false)
+          setTimeout(() => setPopupMessage(null), 3000);
         })
     }
   }, [isAuthenticated])
@@ -72,12 +76,17 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data)
         setUser({ ...user, ...data.user })
+        setPopupMessage(data.message);
+        setTimeout(() => setPopupMessage(null), 3000);
       })
     setIsEditing(false);
     // Save the updated user information to the server or local storage here
   };
+
+  if (loading) {
+    return <h1 className="text-2xl text-center mt-4">Loading...</h1>
+  }
 
   return (
     <div className="bg-gradient-to-r from-gray-100 via-blue-50 to-gray-100 min-h-screen flex items-center justify-center p-8">
@@ -117,6 +126,8 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
                 <input
                   type="number"
                   name="age"
+                  min={18}
+                  max={25}
                   value={user.age}
                   onChange={handleChange}
                   className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -169,7 +180,7 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
           {isEditing ? (
             <select
               name="gender"
-              value={user.branch}
+              value={user.gender}
               onChange={handleChange}
               className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
@@ -178,14 +189,14 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
               <option value="Other">Other</option>
             </select>
           ) : (
-            <p className="bg-gray-100 p-2 mb-4 rounded-lg">{user.gender}</p>
+            <p className="bg-gray-100 p-2 mb-4 rounded-lg">{user.gender || "select your gender"}</p>
           )}
 
           <label className="block text-gray-700 mb-2">Instagram Profile</label>
           {isEditing ? (
             <input
               type="text"
-              name="instaProfile"
+              name="insta_id"
               value={user.insta_id}
               onChange={handleChange}
               className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -197,7 +208,7 @@ const Profile: React.FC<ProfileProps> = ({ isAuthenticated }) => {
               rel="noopener noreferrer"
               className="bg-gray-100 p-2 mb-4 rounded-lg block text-blue-500 hover:text-blue-700 transition duration-300"
             >
-              {user.insta_id}
+              {user.insta_id || 'Add Instagram URL'}
             </a>
           )}
         </div>

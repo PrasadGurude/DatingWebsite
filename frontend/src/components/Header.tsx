@@ -14,6 +14,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated }) => {
         <nav className="flex space-x-6">
           <Link to="/home" className="hover:text-pink-200 transition duration-300">Home</Link>
           <Link to="/all-students" className="hover:text-pink-200 transition duration-300">All Students</Link>
+          <Link to="/status" className="hover:text-pink-200 transition duration-300">Status</Link>
           <Link to="/profile" className="hover:text-pink-200 transition duration-300 mr-4">Profile</Link>
           <Link to="/about" className="hover:text-pink-200 transition duration-300">About</Link>
         </nav>

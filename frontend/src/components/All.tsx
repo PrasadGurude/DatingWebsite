@@ -54,10 +54,16 @@ const All: React.FC<AllProps> = ({ isAuthenticated }) => {
       {/* Header Section */}
       <div className="bg-white shadow-md p-2 px-4 rounded-lg w-full max-w-4xl mb-2 flex justify-between items-center">
         <div className="flex space-x-4">
-          <button onClick={() => setSwithc(true)} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
+          <button onClick={() => {
+              setSwithc(true)
+          }} 
+            className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
             All Users
           </button>
-          <button onClick={() => setSwithc(false)} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
+          <button onClick={() => {
+            setSwithc(false)
+            }} 
+            className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
             Requested
           </button>
         </div>
@@ -94,7 +100,8 @@ const All: React.FC<AllProps> = ({ isAuthenticated }) => {
         </div>
       </div>
 
-      {swithc ? <Allusers isAuthenticated={isAuthenticated} searchList={searchList} /> : <Requested isAuthenticated={isAuthenticated} />}
+
+      {swithc ? <Allusers  isAuthenticated={isAuthenticated} searchList={searchList} /> : <Requested  isAuthenticated={isAuthenticated} />}
 
       {/* List Section */}
       {/* <div className="bg-white shadow-md p-2 rounded-lg w-full max-w-4xl">

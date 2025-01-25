@@ -20,11 +20,13 @@ interface AllusersProps {
 const Allusers: React.FC<AllusersProps> = ({ isAuthenticated, searchList }) => {
 
   const [list, setList] = useState<User[]>(searchList);
+  const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState(1)
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated && searchList.length == 0) {
+      setLoading(true)
       fetch(`${import.meta.env.VITE_BACKEND_URL}/api/all-users/${page}`, {
         method: 'GET',
         headers: {
@@ -34,16 +36,20 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated, searchList }) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
           setList(data.users);
           setPopupMessage(data.message);
+          setLoading(false)
           setTimeout(() => setPopupMessage(null), 3000);
         });
     }
   }, [page]);
 
+  if (loading) {
+    return <h1 className="text-2xl text-center mt-4">Loading...</h1>
+  }
+
   return (
-    <div className='w-full'>
+    <div className='w-full flex flex-col items-center justify-center space-y-4'>
       {popupMessage ? (
         <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg z-50 animate-bounce">
           {popupMessage}
@@ -59,7 +65,7 @@ const Allusers: React.FC<AllusersProps> = ({ isAuthenticated, searchList }) => {
                   <img
                     src={item.picture}
                     alt="User"
-                    className="h-11 w-11 rounded-full border border-gray-200"
+                    className="h-10 w-10 rounded-full border border-gray-200 p-1"
                   />
                   <p className="text-gray-800 font-medium text-lg">{item.name}</p>
                 </div>
